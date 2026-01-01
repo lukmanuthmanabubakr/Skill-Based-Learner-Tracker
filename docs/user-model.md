@@ -6,7 +6,7 @@ Tasks:
    - Name
    - Avatar URL
    - Bio
-   - Preferences (timezone, week start day, etc.)
+   - Preferences (timezone, week start day, etc...)
    - Created & Last active timestamps
 2. Decide data types for each field (string, date, enum, etc.)
 3. Map relationships to other entities:
