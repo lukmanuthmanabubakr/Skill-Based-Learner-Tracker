@@ -1,7 +1,5 @@
 # Authentication Layer
 
-**Issue:** #1  
-**Status:** Planning
 
 ## 1. Authentication Options
 
