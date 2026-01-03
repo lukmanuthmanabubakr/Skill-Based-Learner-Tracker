@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import mongoURI from "./env.js";
 
+
 async function connectDB() {
   try {
     await mongoose.connect(mongoURI);
