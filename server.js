@@ -1,16 +1,19 @@
 import express from "express";
 import connectDB from "./src/config/db.js";
+import userRoutes from "./src/routes/UserRoutes.js";
 
 const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.get("/status", (req, res) => {
+app.get("/", (req, res) => {
   res.status(200).json({ status: "OK" });
 });
 
-const PORT = process.env.PORT || 2009;
+app.use("/api/auth", userRoutes);
+
+const PORT = process.env.PORT || 5050;
 
 async function skillBased() {
   await connectDB();
