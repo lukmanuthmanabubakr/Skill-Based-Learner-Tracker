@@ -1,6 +1,7 @@
 import express from "express";
 import connectDB from "./src/config/db.js";
 import userRoutes from "./src/routes/UserRoutes.js";
+import skillsRouter from "./src/routes/SkillsRoute.js";
 
 const app = express();
 
@@ -12,6 +13,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/auth", userRoutes);
+app.use("/api/skills", skillsRouter);
 
 const PORT = process.env.PORT || 5050;
 
