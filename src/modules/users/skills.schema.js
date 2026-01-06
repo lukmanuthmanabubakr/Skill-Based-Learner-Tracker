@@ -1,4 +1,5 @@
 import mongoose, { Schema } from "mongoose";
+import { SKILL_CATEGORIES } from "../../constants/skillCategories.js";
 
 const SkillsSchema = new mongoose.Schema(
   {
@@ -18,17 +19,7 @@ const SkillsSchema = new mongoose.Schema(
     category: {
       type: String,
       required: true,
-      enum: [
-        "Frontend Development",
-        "Backend Development",
-        "Database",
-        "DevOps",
-        "Design",
-        "Language Learning",
-        "Business Skills",
-        "Creative Arts",
-        "Other",
-      ],
+      enum: SKILL_CATEGORIES
     },
     status: {
       type: String,
