@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 
 class generateToken {
   constructor() {
-    (this.secret = process.env.JWT_TOKEN), (this.expiresIn = "1h");
+    (this.secret = process.env.JWT_TOKEN), (this.expiresIn = "1d");
   }
   generate(userId) {
     return jwt.sign({ userId }, this.secret, { expiresIn: this.expiresIn });
