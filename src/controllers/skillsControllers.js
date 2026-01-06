@@ -1,10 +1,12 @@
 import { SKILL_CATEGORIES } from "../constants/skillCategories.js";
 import Skills from "../modules/users/skills.schema.js";
-const escapeRegExp = (value = "") => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const escapeRegExp = (value = "") =>
+  value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 export const createSkills = async (req, res) => {
   try {
     const { name, description, category } = req.body;
+    const userId = req.user;
 
     const noSpaceName = typeof name === "string" ? name.trim() : "";
     const noSpaceDesc =
@@ -60,7 +62,6 @@ export const createSkills = async (req, res) => {
         },
       });
     }
-    const userId = req.user;
 
     const nameRegex = new RegExp(`^${escapeRegExp(noSpaceName)}$`, "i");
     const existing = await Skills.findOne({ user_id: userId, name: nameRegex });
@@ -89,6 +90,40 @@ export const createSkills = async (req, res) => {
     return res.status(201).json({
       success: true,
       data: newSkills,
+      meta: {},
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+export const getUserSkills = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const userSkills = await Skills.find({
+      user_id: userId,
+      status: "Active",
+    }).sort({ createdAt: -1 });
+
+    const filteredStatus = userSkills.filter((eachSkill) => {
+      return eachSkill.status === "Active";
+    });
+    const filteredCategory = userSkills.filter((eachCategory) => {
+      return eachCategory.category === SKILL_CATEGORIES;
+    });
+
+    if (userSkills.length === 0) {
+      return res.status(200).json({
+        success: true,
+        message: "Skills is not available yet, create one",
+        date: [],
+      });
+    }
+    return res.status(201).json({
+      success: true,
+      data: userSkills,
       meta: {},
     });
   } catch (error) {

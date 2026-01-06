@@ -1,6 +1,7 @@
 export const SKILL_CATEGORIES = Object.freeze([
   "Frontend Development",
   "Backend Development",
+  "Blochchain",
   "Database",
   "DevOps",
   "Design",
