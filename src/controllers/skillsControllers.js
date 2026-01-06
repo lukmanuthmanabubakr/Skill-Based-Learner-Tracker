@@ -102,23 +102,33 @@ export const createSkills = async (req, res) => {
 export const getUserSkills = async (req, res) => {
   try {
     const userId = req.user.id;
-    const userSkills = await Skills.find({
-      user_id: userId,
-      status: "Active",
-    }).sort({ createdAt: -1 });
 
-    const filteredStatus = userSkills.filter((eachSkill) => {
-      return eachSkill.status === "Active";
-    });
-    const filteredCategory = userSkills.filter((eachCategory) => {
-      return eachCategory.category === SKILL_CATEGORIES;
-    });
+    const query = {
+      user_id: userId,
+    };
+
+    if (req.query.status) {
+      query.status = req.query.status;
+    }
+
+    if (req.query.category) {
+      query.category = req.query.category;
+    }
+
+    let sort = { createdAt: -1 };
+
+    if (req.query.sort) {
+      const [field, direction] = req.query.sort.split(":");
+      sort = { [field]: direction === "asc" ? 1 : -1 };
+    }
+    const userSkills = await Skills.find(query).sort(sort);
 
     if (userSkills.length === 0) {
       return res.status(200).json({
         success: true,
         message: "Skills is not available yet, create one",
-        date: [],
+        date: userSkills,
+        meta: {}
       });
     }
     return res.status(201).json({
