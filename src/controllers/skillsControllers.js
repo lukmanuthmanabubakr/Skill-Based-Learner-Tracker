@@ -128,7 +128,7 @@ export const getUserSkills = async (req, res) => {
         success: true,
         message: "Skills is not available yet, create one",
         date: userSkills,
-        meta: {}
+        meta: {},
       });
     }
     return res.status(201).json({
@@ -141,4 +141,9 @@ export const getUserSkills = async (req, res) => {
       message: error.message,
     });
   }
+};
+
+export const updateUserSkills = async (req, res) => {
+  console.log(res.status(200).json({message: "well done"}));
+  
 };
