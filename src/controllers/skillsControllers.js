@@ -144,6 +144,48 @@ export const getUserSkills = async (req, res) => {
 };
 
 export const updateUserSkills = async (req, res) => {
-  console.log(res.status(200).json({message: "well done"}));
-  
+  try {
+    const userId = req.user.id;
+    const skillsId = req.params.skillId;
+
+    const toUpdate = ["name", "description", "category"];
+    const newUpdate = {};
+
+    for (const key of toUpdate) {
+      if (req.body[key] !== undefined) {
+        newUpdate[key] = req.body[key];
+      }
+    }
+
+    if (Object.keys(newUpdate).length === 0) {
+      return res.status(400).json({
+        suucess: false,
+        message: "No valid fields provided for updates",
+      });
+    }
+
+    const updatedSkills = await Skills.findOneAndUpdate(
+      { _id: skillsId, user_id: userId },
+      { $set: newUpdate },
+      { new: true }
+    );
+
+    if (!updatedSkills) {
+      return res.status(404).json({
+        success: false,
+        message: "Skill not found or access denied",
+      });
+    }
+
+     return res.status(200).json({
+      success: true,
+      data: updatedSkills,
+      meta: {},
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
 };

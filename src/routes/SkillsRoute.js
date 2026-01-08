@@ -6,6 +6,6 @@ const skillsRouter = express.Router()
 
 skillsRouter.post("/create", protect, createSkills)
 skillsRouter.get("/", protect, getUserSkills)
-skillsRouter.put("/update", protect, updateUserSkills)
+skillsRouter.put("/update/:skillId", protect, updateUserSkills)
 
 export default skillsRouter
