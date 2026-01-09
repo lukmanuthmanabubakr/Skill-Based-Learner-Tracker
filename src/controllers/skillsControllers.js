@@ -15,7 +15,7 @@ export const createSkills = async (req, res) => {
 
     if (!noSpaceName) {
       return res.status(422).json({
-        suucess: false,
+        success: false,
         error: {
           code: "VALIDATION_ERROR",
           message: "Skill name is required",
@@ -24,7 +24,7 @@ export const createSkills = async (req, res) => {
     }
     if (noSpaceName.length < 3 || noSpaceName.length > 50) {
       return res.status(422).json({
-        suucess: false,
+        success: false,
         error: {
           code: "VALIDATION_ERROR",
           message: "Skill name must be between 3 and 50 characters",
@@ -34,7 +34,7 @@ export const createSkills = async (req, res) => {
     }
     if (noSpaceDesc && noSpaceDesc.length > 500) {
       return res.status(422).json({
-        suucess: false,
+        success: false,
         error: {
           code: "VALIDATION_ERROR",
           message: "Description must be 500 characters or fewer",
@@ -44,7 +44,7 @@ export const createSkills = async (req, res) => {
     }
     if (!noSpaceCategory) {
       return res.status(422).json({
-        suucess: false,
+        success: false,
         error: {
           code: "VALIDATION_ERROR",
           message: "Category is required",
@@ -54,7 +54,7 @@ export const createSkills = async (req, res) => {
     }
     if (!SKILL_CATEGORIES.includes(noSpaceCategory)) {
       return res.status(422).json({
-        suucess: false,
+        success: false,
         error: {
           code: "VALIDATION_ERROR",
           message: "Category must be one in the allowed values",
@@ -103,45 +103,75 @@ export const getUserSkills = async (req, res) => {
   try {
     const userId = req.user.id;
 
+    const ALLOWED_STATUS = ["Active", "Archived"];
+    const ALLOWED_SORT_FIELDS = ["createdAt", "name", "category"];
+
+    // Default query includes only Active skills
     const query = {
       user_id: userId,
+      status: "Active",
     };
 
+    // Override status if query param exists and is valid
     if (req.query.status) {
+      if (!ALLOWED_STATUS.includes(req.query.status)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid status value",
+        });
+      }
       query.status = req.query.status;
     }
 
+    // Add category filter if provided
     if (req.query.category) {
       query.category = req.query.category;
     }
 
-    let sort = { createdAt: -1 };
-
+    // Sorting
+    let sort = { createdAt: -1 }; // default: newest first
     if (req.query.sort) {
       const [field, direction] = req.query.sort.split(":");
+      if (!ALLOWED_SORT_FIELDS.includes(field)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid sort field",
+        });
+      }
       sort = { [field]: direction === "asc" ? 1 : -1 };
     }
-    const userSkills = await Skills.find(query).sort(sort);
 
-    if (userSkills.length === 0) {
-      return res.status(200).json({
-        success: true,
-        message: "Skills is not available yet, create one",
-        date: userSkills,
-        meta: {},
-      });
-    }
-    return res.status(201).json({
+    // Pagination
+    const page = Math.max(parseInt(req.query.page) || 1, 1);
+    const limit = Math.min(parseInt(req.query.limit) || 10, 50);
+    const skip = (page - 1) * limit;
+
+    // Query database
+    const [userSkills, total] = await Promise.all([
+      Skills.find(query).sort(sort).skip(skip).limit(limit),
+      Skills.countDocuments(query),
+    ]);
+
+    return res.status(200).json({
       success: true,
       data: userSkills,
-      meta: {},
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+        status: query.status,
+        category: query.category || null,
+      },
     });
   } catch (error) {
     return res.status(500).json({
+      success: false,
       message: error.message,
     });
   }
 };
+
 
 export const updateUserSkills = async (req, res) => {
   try {
@@ -159,7 +189,7 @@ export const updateUserSkills = async (req, res) => {
 
     if (Object.keys(newUpdate).length === 0) {
       return res.status(400).json({
-        suucess: false,
+        success: false,
         message: "No valid fields provided for updates",
       });
     }
@@ -177,9 +207,89 @@ export const updateUserSkills = async (req, res) => {
       });
     }
 
-     return res.status(200).json({
+    return res.status(200).json({
       success: true,
       data: updatedSkills,
+      meta: {},
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const archiveSkills = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const skillsId = req.params.skillId;
+
+    const findSkillsByUser = await Skills.findOne({
+      _id: skillsId,
+      user_id: userId,
+    });
+
+    if (!findSkillsByUser) {
+      return res.status(404).json({
+        success: false,
+        message: "Skills does not exist",
+      });
+    }
+    if (findSkillsByUser.status === "Archived") {
+      return res.status(409).json({
+        success: false,
+        message: "Skills is already in archived",
+      });
+    }
+    findSkillsByUser.status = "Archived";
+    findSkillsByUser.archived_at = new Date();
+
+    await findSkillsByUser.save();
+
+    return res.status(200).json({
+      success: true,
+      data: findSkillsByUser,
+      meta: {},
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const reactivateSkills = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const skillsId = req.params.skillId;
+
+    const findSkillsByUser = await Skills.findOne({
+      _id: skillsId,
+      user_id: userId,
+    });
+
+    if (!findSkillsByUser) {
+      return res.status(403).json({
+        success: false,
+        message: "Skills does not exist",
+      });
+    }
+    if (findSkillsByUser.status === "Active") {
+      return res.status(409).json({
+        success: false,
+        message: "Skills is already in active",
+      });
+    }
+    findSkillsByUser.status = "Active";
+    findSkillsByUser.archived_at = null;
+
+    await findSkillsByUser.save();
+
+    return res.status(200).json({
+      success: true,
+      data: findSkillsByUser,
       meta: {},
     });
   } catch (error) {
