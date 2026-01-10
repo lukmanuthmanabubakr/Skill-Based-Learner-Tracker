@@ -15,10 +15,16 @@ const practiceSchema = new mongoose.Schema(
     date_practiced: {
       type: Date,
       required: true,
+      validate: {
+        validator: (value) => value <= new Date(),
+        message: "Practice date cannot be in the future",
+      },
     },
     duration: {
       type: Number,
       required: true,
+      min: 1,
+      max: 1440,
     },
     description: {
       type: String,
