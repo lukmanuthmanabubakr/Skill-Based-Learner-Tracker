@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { SKILL_CATEGORIES } from "../constants/skillCategories.js";
 import Skills from "../modules/users/skills.schema.js";
 const escapeRegExp = (value = "") =>
@@ -109,7 +110,6 @@ export const getUserSkills = async (req, res) => {
     // Default query includes only Active skills
     const query = {
       user_id: userId,
-      status: "Active",
     };
 
     // Override status if query param exists and is valid
@@ -160,7 +160,7 @@ export const getUserSkills = async (req, res) => {
         page,
         limit,
         totalPages: Math.ceil(total / limit),
-        status: query.status,
+        status: req.query.status || "all",
         category: query.category || null,
       },
     });
@@ -171,7 +171,6 @@ export const getUserSkills = async (req, res) => {
     });
   }
 };
-
 
 export const updateUserSkills = async (req, res) => {
   try {
@@ -291,6 +290,81 @@ export const reactivateSkills = async (req, res) => {
       success: true,
       data: findSkillsByUser,
       meta: {},
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const deleteSkill = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const skillsId = req.params.skillId;
+
+    const findSkillsByUser = await Skills.findOne({
+      _id: skillsId,
+      user_id: userId,
+    });
+
+    if (!findSkillsByUser) {
+      return res.status(404).json({
+        success: false,
+        message: "Skills does not exist",
+      });
+    }
+
+    await findSkillsByUser.deleteOne();
+
+    return res.status(200).json({
+      success: true,
+      message: "Skill deleted successfully",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+export const multiDeleteSkill = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { ids } = req.body;
+
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ message: "No items provided" });
+    }
+
+    const objectUserId = new mongoose.Types.ObjectId(userId); // <-- use 'new'
+    const objectIds = ids.map((id) => new mongoose.Types.ObjectId(id)); // <-- use 'new'
+
+    const result = await Skills.deleteMany({
+      _id: { $in: objectIds },
+      user_id: objectUserId,
+    });
+
+    if (result.deletedCount === 0) {
+      return res.status(404).json({
+        success: false,
+        message:
+          "No skills were deleted. They may not exist or do not belong to you.",
+        meta: {
+          requested: ids.length,
+          deleted: result.deletedCount,
+        },
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Skills deleted successfully",
+      meta: {
+        requested: ids.length,
+        deleted: result.deletedCount,
+      },
     });
   } catch (error) {
     return res.status(500).json({
