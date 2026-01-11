@@ -63,44 +63,124 @@ export const getPracticeSession = async (req, res) => {
   try {
     const userId = req.user.id;
 
+    const { skillId, from, to, sort, page = 1, limit = 10 } = req.query;
+
     const ALLOWED_SORT_FIELDS = ["date_practiced"];
 
     const query = {
       user_id: userId,
     };
 
-    let sort = { date_practiced: -1 }; // default: newest first
-    if (req.query.sort) {
-      const [field, direction] = req.query.sort.split(":");
+    if (skillId) {
+      query.skill_id = skillId;
+    }
+
+    if (from || to) {
+      query.date_practiced = {};
+      if (from) {
+        query.date_practiced.$gte = new Date(from);
+      }
+      if (to) {
+        query.date_practiced.$lte = new Date(to);
+      }
+    }
+
+    let sortOption = { date_practiced: -1 };
+    if (sort) {
+      const [field, direction] = sort.split(":");
       if (!ALLOWED_SORT_FIELDS.includes(field)) {
         return res.status(400).json({
           success: false,
           message: "Invalid sort field",
         });
       }
-      sort = { [field]: direction === "asc" ? 1 : -1 };
+      sortOption = { [field]: direction === "asc" ? 1 : -1 };
     }
 
-    const page = Math.max(parseInt(req.query.page) || 1, 1);
-    const limit = Math.min(parseInt(req.query.limit) || 10, 50);
-    const skip = (page - 1) * limit;
+    const safePage = Math.max(parseInt(page), 1);
+    const safeLimit = Math.min(parseInt(limit), 50);
+    const skip = (safePage - 1) * safeLimit;
 
-    const [userPractice, total] = await Promise.all([
-      Practice.find(query).sort(sort).skip(skip).limit(limit),
+    const [practiceLogs, total] = await Promise.all([
+      Practice.find(query).sort(sortOption).skip(skip).limit(safeLimit),
       Practice.countDocuments(query),
     ]);
 
     return res.status(200).json({
       success: true,
-      data: userPractice,
+      data: practiceLogs,
       meta: {
         total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit),
-        status: req.query.status || "all",
-        category: query.category || null,
+        page: safePage,
+        limit: safeLimit,
+        totalPages: Math.ceil(total / safeLimit),
+        filters: {
+          skillId: skillId || null,
+          from: from || null,
+          to: to || null,
+        },
       },
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const updateSessionPractice = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const practiceId = req.params.practiceId;
+
+    const ALLOWED_UPDATES = [
+      "description",
+      "duration",
+      "date_practiced",
+      "difficulty_rating",
+      "confidence_rating",
+    ];
+
+    const updates = {};
+
+    for (const field of ALLOWED_UPDATES) {
+      if (req.body[field] !== undefined) {
+        updates[field] = req.body[field];
+      }
+    }
+
+  
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "No valid fields provided for update",
+      });
+    }
+
+    const updatedPractice = await Practice.findOneAndUpdate(
+      {
+        _id: practiceId,
+        user_id: userId,
+      },
+      { $set: updates },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+
+    if (!updatedPractice) {
+      return res.status(404).json({
+        success: false,
+        message: "Practice log not found or access denied",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: updatedPractice,
+      meta: {},
     });
   } catch (error) {
     return res.status(500).json({

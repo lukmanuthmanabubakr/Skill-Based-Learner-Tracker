@@ -107,12 +107,10 @@ export const getUserSkills = async (req, res) => {
     const ALLOWED_STATUS = ["Active", "Archived"];
     const ALLOWED_SORT_FIELDS = ["createdAt", "name", "category"];
 
-    // Default query includes only Active skills
     const query = {
       user_id: userId,
     };
 
-    // Override status if query param exists and is valid
     if (req.query.status) {
       if (!ALLOWED_STATUS.includes(req.query.status)) {
         return res.status(400).json({
@@ -123,13 +121,11 @@ export const getUserSkills = async (req, res) => {
       query.status = req.query.status;
     }
 
-    // Add category filter if provided
     if (req.query.category) {
       query.category = req.query.category;
     }
 
-    // Sorting
-    let sort = { createdAt: -1 }; // default: newest first
+    let sort = { createdAt: -1 }; 
     if (req.query.sort) {
       const [field, direction] = req.query.sort.split(":");
       if (!ALLOWED_SORT_FIELDS.includes(field)) {
@@ -141,12 +137,10 @@ export const getUserSkills = async (req, res) => {
       sort = { [field]: direction === "asc" ? 1 : -1 };
     }
 
-    // Pagination
     const page = Math.max(parseInt(req.query.page) || 1, 1);
     const limit = Math.min(parseInt(req.query.limit) || 10, 50);
     const skip = (page - 1) * limit;
 
-    // Query database
     const [userSkills, total] = await Promise.all([
       Skills.find(query).sort(sort).skip(skip).limit(limit),
       Skills.countDocuments(query),
@@ -339,8 +333,8 @@ export const multiDeleteSkill = async (req, res) => {
       return res.status(400).json({ message: "No items provided" });
     }
 
-    const objectUserId = new mongoose.Types.ObjectId(userId); // <-- use 'new'
-    const objectIds = ids.map((id) => new mongoose.Types.ObjectId(id)); // <-- use 'new'
+    const objectUserId = new mongoose.Types.ObjectId(userId); 
+    const objectIds = ids.map((id) => new mongoose.Types.ObjectId(id)); 
 
     const result = await Skills.deleteMany({
       _id: { $in: objectIds },
