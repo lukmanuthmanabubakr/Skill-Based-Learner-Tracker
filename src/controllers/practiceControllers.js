@@ -150,7 +150,6 @@ export const updateSessionPractice = async (req, res) => {
       }
     }
 
-  
     if (Object.keys(updates).length === 0) {
       return res.status(400).json({
         success: false,
@@ -180,6 +179,39 @@ export const updateSessionPractice = async (req, res) => {
     return res.status(200).json({
       success: true,
       data: updatedPractice,
+      meta: {},
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const deletePracticeSession = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const practiceId = req.params.practiceId;
+
+    const practice = await Practice.findOne({
+      _id: practiceId,
+      user_id: userId,
+    });
+
+    if (!practice) {
+      return res.status(404).json({
+        success: false,
+        message: "Practice session not found or access denied",
+      });
+    }
+
+
+    await practice.deleteOne();
+
+    return res.status(200).json({
+      success: true,
+      message: "Practice session deleted successfully",
       meta: {},
     });
   } catch (error) {
