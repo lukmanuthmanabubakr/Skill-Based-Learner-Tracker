@@ -3,10 +3,14 @@ import mongoose, { Schema } from "mongoose";
 const EvidenceSchema = new mongoose.Schema(
   {
     practice_log_id: {
-      required: true,
       type: Schema.Types.ObjectId,
       ref: "Practice",
     },
+    skill_id: {
+      type: Schema.Types.ObjectId,
+      ref: "Skill",
+    },
+
     user_id: {
       type: Schema.Types.ObjectId,
       ref: "User",
@@ -32,8 +36,14 @@ const EvidenceSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-
 EvidenceSchema.pre("validate", function (next) {
+  // Must belong to either a practice log or a skill
+  if (!this.practice_log_id && !this.skill_id) {
+    return next(
+      new Error("Evidence must belong to a practice log or a skill")
+    );
+  }
+
   if (this.type === "note" && !this.note) {
     return next(new Error("Text is required for note type"));
   }
@@ -44,6 +54,7 @@ EvidenceSchema.pre("validate", function (next) {
 
   next();
 });
+
 
 const evidenceModel = mongoose.model("Evidence", EvidenceSchema);
 
