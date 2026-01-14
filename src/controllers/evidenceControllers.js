@@ -2,53 +2,67 @@ import Evidence from "../modules/users/evidenceLog.schema.js";
 import Skills from "../modules/users/skills.schema.js";
 import Practice from "../modules/users/practiceLog.schema.js";
 
-export const createEvidence = async (req, res) => {
-  try {
-    const userId = req.user.id;
-    const { skill_id, practice_log_id, type, uri, note, metadata } = req.body;
+export const createEvidenceForSkill = async (req, res) => {
+	try {
+		const userId = req.user.id;
+		const { skillId } = req.params;
+		const { type, uri, note, metadata } = req.body;
 
-    if (!skill_id && !practice_log_id) {
-      return res.status(422).json({
-        success: false,
-        error: { code: "VALIDATION_ERROR", message: "Either skill_id or practice_log_id is required" },
-      });
-    }
+		const skill = await Skills.findOne({ _id: skillId, user_id: userId });
+		if (!skill) {
+			return res.status(404).json({
+				success: false,
+				error: { code: "NOT_FOUND", message: "Skill not found or access denied" },
+			});
+		}
 
-    if (skill_id && practice_log_id) {
-      return res.status(422).json({
-        success: false,
-        error: { code: "VALIDATION_ERROR", message: "Evidence must belong to either a skill or a practice log" },
-      });
-    }
+		const evidence = await Evidence.create({
+			skill_id: skillId,
+			user_id: userId,
+			type,
+			uri,
+			note,
+			metadata,
+		});
 
-    if (skill_id) {
-      const skill = await Skills.findOne({ _id: skill_id, user_id: userId });
-      if (!skill) {
-        return res.status(404).json({ success: false, error: { code: "NOT_FOUND", message: "Skill not found or access denied" } });
-      }
-    }
+		return res.status(201).json({ success: true, data: evidence, meta: {} });
+	} catch (error) {
+		return res.status(500).json({ success: false, message: error.message });
+	}
+};
 
-    if (practice_log_id) {
-      const practice = await Practice.findOne({ _id: practice_log_id, user_id: userId });
-      if (!practice) {
-        return res.status(404).json({ success: false, error: { code: "NOT_FOUND", message: "Practice log not found or access denied" } });
-      }
-    }
 
-    const created = await Evidence.create({
-      practice_log_id: practice_log_id || null,
-      skill_id: skill_id || null,
-      user_id: userId,
-      type,
-      uri,
-      note,
-      metadata,
-    });
+export const createEvidenceForPractice = async (req, res) => {
+	try {
+		const userId = req.user.id;
+		const { practiceLogId } = req.params;
+		const { type, uri, note, metadata } = req.body;
 
-    return res.status(201).json({ success: true, data: created, meta: {} });
-  } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
-  }
+		const practice = await Practice.findOne({
+			_id: practiceLogId,
+			user_id: userId,
+		});
+
+		if (!practice) {
+			return res.status(404).json({
+				success: false,
+				error: { code: "NOT_FOUND", message: "Practice log not found or access denied" },
+			});
+		}
+
+		const evidence = await Evidence.create({
+			practice_log_id: practiceLogId,
+			user_id: userId,
+			type,
+			uri,
+			note,
+			metadata,
+		});
+
+		return res.status(201).json({ success: true, data: evidence, meta: {} });
+	} catch (error) {
+		return res.status(500).json({ success: false, message: error.message });
+	}
 };
 
 
