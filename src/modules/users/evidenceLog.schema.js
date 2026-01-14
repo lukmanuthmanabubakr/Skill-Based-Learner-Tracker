@@ -17,9 +17,11 @@ const EvidenceSchema = new mongoose.Schema(
       required: true,
     },
     type: {
+      type: String,
       enum: ["file", "link", "note"],
       required: true,
     },
+
     uri: {
       type: String,
       required: function () {
@@ -36,11 +38,21 @@ const EvidenceSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+EvidenceSchema.index({ user_id: 1 });
+EvidenceSchema.index({ skill_id: 1 });
+EvidenceSchema.index({ practice_log_id: 1 });
+
+
 EvidenceSchema.pre("validate", function (next) {
   // Must belong to either a practice log or a skill
   if (!this.practice_log_id && !this.skill_id) {
+    return next(new Error("Evidence must belong to a practice log or a skill"));
+  }
+
+  if (this.practice_log_id && this.skill_id) {
     return next(
-      new Error("Evidence must belong to a practice log or a skill")
+      new Error("Evidence cannot belong to both a practice log and a skill")
     );
   }
 
@@ -54,7 +66,6 @@ EvidenceSchema.pre("validate", function (next) {
 
   next();
 });
-
 
 const evidenceModel = mongoose.model("Evidence", EvidenceSchema);
 

@@ -45,7 +45,7 @@ User (one) ──→ Evidence (many)
 Practice Logs (one) ──→ Evidence (many)
 ```
 
-* Evidence cannot exist without a practice log
+* Evidence must belong to either a practice log or a skill, but never both.
 * Deleting a practice log cascades to its evidence
 
 ---
