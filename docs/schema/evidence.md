@@ -1,8 +1,12 @@
 # Evidence Schema
 
-**Purpose**
+## Purpose
 
-The Evidence table stores optional proof that a practice session occurred. Evidence always belongs to a single practice log and is used for verification, reflection, and richer context.
+The Evidence model stores optional proof that a **practice session occurred**.
+Evidence adds context, verification, and reflection to practice logs.
+
+Evidence never exists on its own.
+It always belongs to exactly **one practice log**.
 
 ---
 
@@ -10,31 +14,32 @@ The Evidence table stores optional proof that a practice session occurred. Evide
 
 Evidence is responsible for:
 
-* storing references to files, links, or notes
-* associating proof with a specific practice session
-* enforcing ownership and access rules
+- storing references to files, links, or notes
+- attaching proof to a specific practice session
+- enforcing ownership and access control
 
-Evidence is not responsible for:
+Evidence is NOT responsible for:
 
-* validating learning quality
-* calculating progress
-* modifying practice logs
+- validating learning quality
+- calculating progress
+- updating skill stages
+- modifying practice logs
 
 ---
 
 ## Core Fields
 
-| Field Name      | Type            | Required    | Description                               |
-| --------------- | --------------- | ----------- | ----------------------------------------- |
-| id              | UUID / ObjectId | Yes         | Primary identifier                        |
-| practice_log_id | UUID / ObjectId | Yes         | Parent practice session                   |
-| user_id         | UUID / ObjectId | Yes         | Owner of the evidence                     |
-| type            | Enum            | Yes         | file, link, note                          |
-| uri             | String          | Conditional | File path or URL (required for file/link) |
-| note            | String          | Conditional | Text note (required for note type)        |
-| metadata        | JSON            | No          | Size, mime type, duration, etc.           |
-| created_at      | Timestamp       | Yes         | Creation time                             |
-| updated_at      | Timestamp       | No          | Update time                               |
+| Field Name        | Type            | Required | Description                                  |
+|------------------|-----------------|----------|----------------------------------------------|
+| id               | ObjectId        | Yes      | Primary identifier                            |
+| practice_log_id  | ObjectId        | Yes      | Parent practice session                      |
+| user_id          | ObjectId        | Yes      | Owner of the evidence                        |
+| type             | Enum            | Yes      | file, link, note                             |
+| uri              | String          | Conditional | File path or URL (file/link only)        |
+| note             | String          | Conditional | Text note (note type only)               |
+| metadata         | JSON            | No       | Size, mime type, duration, etc.              |
+| created_at       | Timestamp       | Yes      | Creation time                                |
+| updated_at       | Timestamp       | Yes      | Last update time                             |
 
 ---
 

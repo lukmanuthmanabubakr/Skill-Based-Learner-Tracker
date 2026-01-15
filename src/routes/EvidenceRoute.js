@@ -1,21 +1,21 @@
 import express from "express";
 import { protect } from "../middleware/authToken.js";
 import {
-  getEvidenceForSkill,
+  getEvidenceForPractice,
   deleteEvidence,
-  createEvidenceForSkill,
-  createEvidenceForPractice,
+  createEvidence,
 } from "../controllers/evidenceControllers.js";
 
 const evidenceRouter = express.Router();
 
-evidenceRouter.post("/skills/:skillId/evidence", protect, createEvidenceForSkill);
+
 evidenceRouter.post(
   "/practice-logs/:practiceLogId/evidence",
   protect,
-  createEvidenceForPractice
+  createEvidence
 );
-evidenceRouter.get("/:skillId", protect, getEvidenceForSkill);
-evidenceRouter.delete("/:evidenceId", protect, deleteEvidence);
+evidenceRouter.get("/skills/:skillId/evidence", protect, getEvidenceForPractice);
+
+evidenceRouter.delete("/evidence/:evidenceId", protect, deleteEvidence);
 
 export default evidenceRouter;
