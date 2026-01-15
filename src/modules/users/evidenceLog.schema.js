@@ -1,21 +1,21 @@
 import mongoose, { Schema } from "mongoose";
 
-const EvidenceSchema = new mongoose.Schema(
+const EvidenceSchema = new Schema(
   {
     practice_log_id: {
       type: Schema.Types.ObjectId,
       ref: "Practice",
-    },
-    skill_id: {
-      type: Schema.Types.ObjectId,
-      ref: "Skill",
+      required: true,
+      index: true,
     },
 
     user_id: {
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
+      index: true,
     },
+
     type: {
       type: String,
       enum: ["file", "link", "note"],
@@ -28,45 +28,19 @@ const EvidenceSchema = new mongoose.Schema(
         return this.type === "file" || this.type === "link";
       },
     },
+
     note: {
       type: String,
       required: function () {
         return this.type === "note";
       },
     },
-    metadata: { type: Object },
+
+    metadata: {
+      type: Object,
+    },
   },
   { timestamps: true }
 );
 
-EvidenceSchema.index({ user_id: 1 });
-EvidenceSchema.index({ skill_id: 1 });
-EvidenceSchema.index({ practice_log_id: 1 });
-
-
-EvidenceSchema.pre("validate", function (next) {
-  // Must belong to either a practice log or a skill
-  if (!this.practice_log_id && !this.skill_id) {
-    return next(new Error("Evidence must belong to a practice log or a skill"));
-  }
-
-  if (this.practice_log_id && this.skill_id) {
-    return next(
-      new Error("Evidence cannot belong to both a practice log and a skill")
-    );
-  }
-
-  if (this.type === "note" && !this.note) {
-    return next(new Error("Text is required for note type"));
-  }
-
-  if ((this.type === "file" || this.type === "link") && !this.uri) {
-    return next(new Error("URL is required for file or link type"));
-  }
-
-  next();
-});
-
-const evidenceModel = mongoose.model("Evidence", EvidenceSchema);
-
-export default evidenceModel;
+export default mongoose.model("Evidence", EvidenceSchema);

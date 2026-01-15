@@ -48,6 +48,15 @@ const practiceSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+practiceSchema.virtual("evidence", {
+  ref: "Evidence",
+  localField: "_id",
+  foreignField: "practice_log_id",
+});
+
+practiceSchema.set("toJSON", { virtuals: true });
+practiceSchema.set("toObject", { virtuals: true });
+
 const practiceModel = mongoose.model("Practice", practiceSchema);
 
 export default practiceModel;
