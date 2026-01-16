@@ -1,0 +1,55 @@
+name: Backend Tests
+
+on:
+  push:
+    branches: [ main, develop, feat/* ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      mongodb:
+        image: mongo:latest
+        options: >-
+          --health-cmd mongosh
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 27017:27017
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Use Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '22.x'
+    
+    - name: Install dependencies
+      run: npm install
+      working-directory: ./backend
+    
+    - name: Create .env for testing
+      run: |
+        cat > .env << EOF
+        MONGO_URI=mongodb://localhost:27017/skill-based-test
+        PORT=5050
+        JWT_SECRET=test-secret-key-for-ci-cd
+        NODE_ENV=test
+        EOF
+      working-directory: ./backend
+    
+    - name: Start server
+      run: npm run dev &
+      working-directory: ./backend
+    
+    - name: Wait for server
+      run: sleep 3
+    
+    - name: Run tests
+      run: npm test && npm run test:update-user && npm run test:integration && npm run test:final-three
+      working-directory: ./backend
