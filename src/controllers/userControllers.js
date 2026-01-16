@@ -58,6 +58,7 @@ export const registerUser = async (req, res) => {
         },
         token: token,
       },
+      meta: {},
     });
   } catch (error) {
     return res.status(500).json({
@@ -108,8 +109,11 @@ export const loginUser = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "User LoggedIn succuedsfully",
-      token,
-      user,
+      data: {
+        token,
+        user,
+      },
+      meta: {},
     });
   } catch (error) {
     return res.status(500).json({
@@ -135,6 +139,7 @@ export const getUser = async (req, res) => {
       data: {
         user,
       },
+      meta: {},
     });
   } catch (error) {
     return res.status(500).json({
