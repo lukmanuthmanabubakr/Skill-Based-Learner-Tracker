@@ -5,7 +5,11 @@
   "main": "server.js",
   "scripts": {
     "start": "node server",
-    "dev": "nodemon server"
+    "dev": "nodemon server",
+    "test": "set TEST_MODE=true && node test-runner.js",
+    "test:update-user": "set TEST_MODE=true && node --test tests/updateUser.test.js",
+    "test:integration": "set TEST_MODE=true && node --test tests/backendIntegration.test.js",
+    "test:final-three": "set TEST_MODE=true && node tests/finalThreeTasks.test.js"
   },
   "keywords": [],
   "author": "",
@@ -18,6 +22,8 @@
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.1.1",
-    "nodemon": "^3.1.11"
+    "node-fetch": "^3.3.2",
+    "nodemon": "^3.1.11",
+    "uuid": "^9.0.1"
   }
 }

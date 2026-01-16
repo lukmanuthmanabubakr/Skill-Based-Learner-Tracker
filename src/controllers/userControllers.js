@@ -1,6 +1,9 @@
 import express from "express";
 import User from "../modules/users/user.schema.js";
 import generateToken from "../utils/token.js";
+import { validateObject, userProfileValidationRules } from "../utils/validators.js";
+import { AppError, ValidationError } from "../utils/appError.js";
+import logger from "../utils/logger.js";
 
 // The Registration Logic
 export const registerUser = async (req, res) => {
@@ -144,6 +147,89 @@ export const getUser = async (req, res) => {
   } catch (error) {
     return res.status(500).json({
       message: error.message,
+    });
+  }
+};
+
+/**
+ * Update user profile
+ * Allows user to update their profile information (name, bio, avatar_url)
+ * Senior backend engineer note: This follows REST principles (PATCH for partial updates)
+ * and includes proper validation, logging, and error handling.
+ * 
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
+export const updateUserProfile = async (req, res) => {
+  try {
+    const userId = req.user?.id || req.user?._id;
+    
+    if (!userId) {
+      throw new AppError("UNAUTHORIZED", "User not authenticated", 401);
+    }
+
+    // Validate input against schema
+    const updateData = validateObject(req.body, userProfileValidationRules);
+
+    // Ensure at least one field is being updated
+    const fieldsToUpdate = Object.keys(updateData).filter(
+      (key) => updateData[key] !== undefined && updateData[key] !== null
+    );
+
+    if (fieldsToUpdate.length === 0) {
+      throw new ValidationError("No valid fields provided for update", {
+        provided: Object.keys(req.body),
+      });
+    }
+
+    // Update user in database with validation enabled
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { $set: updateData },
+      {
+        new: true, // Return updated document
+        runValidators: true, // Run schema validators
+      }
+    ).select("-password");
+
+    if (!updatedUser) {
+      throw new AppError("USER_NOT_FOUND", "User not found", 404);
+    }
+
+    // Log the change with correlation ID
+    logger.info(`User profile updated: ${userId}`, {
+      updatedFields: fieldsToUpdate,
+      userId,
+    });
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        user: updatedUser,
+      },
+      meta: {
+        message: "Profile updated successfully",
+      },
+    });
+  } catch (error) {
+    if (error instanceof AppError || error instanceof ValidationError) {
+      logger.error(`Profile update failed: ${error.message}`, {
+        code: error.code,
+        userId: req.user?.id,
+      });
+      return res.status(error.statusCode).json(error.toJSON());
+    }
+
+    logger.error(`Unexpected error during profile update: ${error.message}`, {
+      userId: req.user?.id,
+    });
+
+    return res.status(500).json({
+      success: false,
+      error: {
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to update profile",
+      },
     });
   }
 };
