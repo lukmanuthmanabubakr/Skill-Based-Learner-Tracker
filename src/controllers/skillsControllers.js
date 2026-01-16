@@ -125,7 +125,7 @@ export const getUserSkills = async (req, res) => {
       query.category = req.query.category;
     }
 
-    let sort = { createdAt: -1 }; 
+    let sort = { createdAt: -1 };
     if (req.query.sort) {
       const [field, direction] = req.query.sort.split(":");
       if (!ALLOWED_SORT_FIELDS.includes(field)) {
@@ -315,6 +315,7 @@ export const deleteSkill = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "Skill deleted successfully",
+      meta: {},
     });
   } catch (error) {
     return res.status(500).json({
@@ -333,8 +334,8 @@ export const multiDeleteSkill = async (req, res) => {
       return res.status(400).json({ message: "No items provided" });
     }
 
-    const objectUserId = new mongoose.Types.ObjectId(userId); 
-    const objectIds = ids.map((id) => new mongoose.Types.ObjectId(id)); 
+    const objectUserId = new mongoose.Types.ObjectId(userId);
+    const objectIds = ids.map((id) => new mongoose.Types.ObjectId(id));
 
     const result = await Skills.deleteMany({
       _id: { $in: objectIds },
