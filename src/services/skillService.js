@@ -7,7 +7,7 @@ class SkillService {
   /**
    * Create a new skill
    * @param {string} userId - User ID
-   * @param {Object} skillData - Skill data
+   * @param {Object} skillData - Skills data
    * @returns {Promise<Object>} Created skill
    */
   async createSkill(userId, skillData) {
