@@ -151,15 +151,7 @@ export const getUser = async (req, res) => {
   }
 };
 
-/**
- * Update user profile
- * Allows user to update their profile information (name, bio, avatar_url)
- * Senior backend engineer note: This follows REST principles (PATCH for partial updates)
- * and includes proper validation, logging, and error handling.
- * 
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- */
+
 export const updateUserProfile = async (req, res) => {
   try {
     const userId = req.user?.id || req.user?._id;

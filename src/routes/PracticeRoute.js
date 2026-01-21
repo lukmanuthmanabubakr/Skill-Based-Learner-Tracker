@@ -9,9 +9,9 @@ import {
 
 const practiceRoute = express.Router();
 
-practiceRoute.post("/", protect, createPracticeSession);
+practiceRoute.post("/skills/:skillId", protect, createPracticeSession);
 practiceRoute.get("/", protect, getPracticeSession);
-practiceRoute.patch("/:id", protect, updateSessionPractice);
-practiceRoute.delete("/:id", protect, deletePracticeSession);
+practiceRoute.patch("/:practiceId", protect, updateSessionPractice);
+practiceRoute.delete("/:practiceId", protect, deletePracticeSession);
 
 export default practiceRoute;

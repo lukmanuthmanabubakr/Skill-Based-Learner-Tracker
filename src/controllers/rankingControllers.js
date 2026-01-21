@@ -1,3 +1,4 @@
+// controllers/rankingControllers.js
 import rankingService from "../services/skillRankingService.js";
 import { AppError } from "../utils/appError.js";
 import logger from "../utils/logger.js";
@@ -70,11 +71,7 @@ export const getUserLeaderboard = async (req, res) => {
     const parsedLimit = limit ? parseInt(limit, 10) : 50;
 
     if (isNaN(parsedLimit)) {
-      throw new AppError(
-        "VALIDATION_ERROR",
-        "Limit must be a valid number",
-        422
-      );
+      throw new AppError("VALIDATION_ERROR", "Limit must be a valid number", 422);
     }
 
     const leaderboard = await rankingService.getUserLeaderboard(parsedLimit);
@@ -113,24 +110,19 @@ export const getSkillLeaderboard = async (req, res) => {
     const parsedLimit = limit ? parseInt(limit, 10) : 50;
 
     if (!skillId) {
-      throw new AppError(
-        "VALIDATION_ERROR",
-        "Skill ID is required",
-        422
-      );
+      throw new AppError("VALIDATION_ERROR", "Skill ID is required", 422);
     }
 
     if (isNaN(parsedLimit)) {
-      throw new AppError(
-        "VALIDATION_ERROR",
-        "Limit must be a valid number",
-        422
-      );
+      throw new AppError("VALIDATION_ERROR", "Limit must be a valid number", 422);
     }
 
     const leaderboard = await rankingService.getSkillLeaderboard(skillId, parsedLimit);
 
-    logger.info("Skill leaderboard endpoint accessed", { skillId, limit: parsedLimit });
+    logger.info("Skill leaderboard endpoint accessed", {
+      skillId,
+      limit: parsedLimit,
+    });
 
     return res.status(200).json({
       success: true,

@@ -8,8 +8,18 @@ import {
 
 const evidenceRouter = express.Router();
 
-evidenceRouter.post("/", protect, createEvidence);
-evidenceRouter.get("/skills/:id/evidence", protect, getEvidenceForPractice);
-evidenceRouter.delete("/:id", protect, deleteEvidence);
+evidenceRouter.post(
+  "/practice/:practiceLogId/evidence",
+  protect,
+  createEvidence
+);
+
+evidenceRouter.get(
+  "/practice/:practiceLogId/evidence",
+  protect,
+  getEvidenceForPractice
+);
+
+evidenceRouter.delete("/:evidenceId", protect, deleteEvidence);
 
 export default evidenceRouter;
