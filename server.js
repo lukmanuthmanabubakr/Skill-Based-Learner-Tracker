@@ -17,6 +17,7 @@ import correlationIdMiddleware from "./src/middleware/correlationId.js";
 import errorHandler from "./src/middleware/errorHandler.js";
 import swaggerUi from "swagger-ui-express";
 import { swaggerSpec } from "./docs/swagger.js";
+import cors from "cors";
 
 import "./src/modules/users/user.schema.js";
 import "./src/modules/users/skills.schema.js";
@@ -24,6 +25,16 @@ import "./src/modules/users/practiceLog.schema.js";
 import "./src/modules/users/evidenceLog.schema.js";
 
 const app = express();
+
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173", // Vite dev server
+      "http://127.0.0.1:5173",
+    ],
+    credentials: true,
+  }),
+);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
