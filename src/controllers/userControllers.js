@@ -9,7 +9,6 @@ import logger from "../utils/logger.js";
 export const registerUser = async (req, res) => {
   try {
     const { name, email, password } = req.body;
-    //   To check if there is no, name or email or password
     if (!name || !email || !password) {
       return res.status(422).json({
         success: false,
@@ -20,7 +19,6 @@ export const registerUser = async (req, res) => {
       });
     }
 
-    //   To check the password strenth
     if (password.length < 10) {
       return res.status(409).json({
         success: false,
@@ -31,7 +29,6 @@ export const registerUser = async (req, res) => {
       });
     }
 
-    //   check if users exist
     const user = await User.findOne({ email });
     if (user) {
       return res.status(409).json({
