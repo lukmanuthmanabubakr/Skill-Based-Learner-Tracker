@@ -16,6 +16,28 @@ const swaggerDefinition = {
     },
   ],
 
+  tags: [
+    { name: "Auth", description: "Authentication and profile" },
+    { name: "Skills", description: "Manage user skills" },
+    {
+      name: "Practice Logs",
+      description: "Track learning and skill practice sessions",
+    },
+    {
+      name: "Evidence",
+      description: "Evidence (proof) attached to practice sessions",
+    },
+    {
+      name: "Analytics",
+      description:
+        "Analytics endpoints for progress, summaries, timelines, and streaks",
+    },
+    {
+      name: "Rankings",
+      description: "Public ranking and leaderboard endpoints",
+    },
+  ],
+
   components: {
     securitySchemes: {
       bearerAuth: {
