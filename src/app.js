@@ -4,13 +4,6 @@ import swaggerUiDist from "swagger-ui-dist";
 import { swaggerSpec } from "../docs/swagger.js";
 import connectDB from "./config/db.js";
 
-import userRoutes from "./routes/UserRoutes.js";
-import skillsRouter from "./routes/SkillsRoute.js";
-import practiceRoute from "./routes/PracticeRoute.js";
-import evidenceRoute from "./routes/EvidenceRoute.js";
-import analyticsRoute from "./routes/AnalyticsRoute.js";
-import rankingRoute from "./routes/RankingRoute.js";
-
 import {
   globalRateLimit,
   authRateLimit,
@@ -21,6 +14,13 @@ import {
 
 import correlationIdMiddleware from "./middleware/correlationId.js";
 import errorHandler from "./middleware/errorHandler.js";
+
+import userRoutes from "./routes/UserRoutes.js";
+import skillsRouter from "./routes/SkillsRoute.js";
+import practiceRoute from "./routes/PracticeRoute.js";
+import evidenceRoute from "./routes/EvidenceRoute.js";
+import analyticsRoute from "./routes/AnalyticsRoute.js";
+import rankingRoute from "./routes/RankingRoute.js";
 
 import "./modules/users/user.schema.js";
 import "./modules/users/skills.schema.js";
@@ -46,25 +46,22 @@ app.use(correlationIdMiddleware);
 app.use(globalRateLimit);
 
 const swaggerPath = swaggerUiDist.getAbsoluteFSPath();
-app.get("/api/docs/swagger-ui.css", (req, res) => {
-  res.sendFile(`${swaggerPath}/swagger-ui.css`);
+
+app.get("/api/debug/swagger-path", (req, res) => {
+  res.status(200).json({ swaggerPath });
 });
 
-app.use("/api/docs", express.static(swaggerPath));
 
 app.get("/api/docs/swagger.json", (req, res) => res.json(swaggerSpec));
+app.use("/api/docs", express.static(swaggerPath));
 
 app.get("/api/docs", (req, res) => {
-  res.setHeader("Content-Type", "text/html; charset=utf-8");
-  res.send(`
-<!DOCTYPE html>
+  res.type("html").send(`<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <title>SkillBased Tracker API Docs</title>
   <link rel="stylesheet" href="/api/docs/swagger-ui.css" />
-  <link rel="icon" type="image/png" href="/api/docs/favicon-32x32.png" sizes="32x32" />
-  <link rel="icon" type="image/png" href="/api/docs/favicon-16x16.png" sizes="16x16" />
 </head>
 <body>
   <div id="swagger-ui"></div>
@@ -75,17 +72,13 @@ app.get("/api/docs", (req, res) => {
       SwaggerUIBundle({
         url: "/api/docs/swagger.json",
         dom_id: "#swagger-ui",
-        presets: [
-          SwaggerUIBundle.presets.apis,
-          SwaggerUIStandalonePreset
-        ],
+        presets: [SwaggerUIBundle.presets.apis, SwaggerUIStandalonePreset],
         layout: "StandaloneLayout"
       });
     };
   </script>
 </body>
-</html>
-`);
+</html>`);
 });
 
 app.get("/", (req, res) => res.json({ status: "OK" }));
