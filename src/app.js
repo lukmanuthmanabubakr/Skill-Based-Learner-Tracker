@@ -1,4 +1,7 @@
 import express from "express";
+import cors from "cors";
+import swaggerUiDist from "swagger-ui-dist";
+import { swaggerSpec } from "../docs/swagger.js";
 import connectDB from "./config/db.js";
 
 import userRoutes from "./routes/UserRoutes.js";
@@ -19,10 +22,6 @@ import {
 import correlationIdMiddleware from "./middleware/correlationId.js";
 import errorHandler from "./middleware/errorHandler.js";
 
-import cors from "cors";
-import swaggerUiDist from "swagger-ui-dist";
-import { swaggerSpec } from "../docs/swagger.js";
-
 import "./modules/users/user.schema.js";
 import "./modules/users/skills.schema.js";
 import "./modules/users/practiceLog.schema.js";
@@ -30,7 +29,6 @@ import "./modules/users/evidenceLog.schema.js";
 
 const app = express();
 
-// CORS
 app.use(
   cors({
     origin: [
@@ -44,23 +42,20 @@ app.use(
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
 app.use(correlationIdMiddleware);
 app.use(globalRateLimit);
 
-
-app.use("/api/docs", express.static(swaggerUiDist.getAbsoluteFSPath()));
-
+const swaggerPath = swaggerUiDist.getAbsoluteFSPath();
+app.use("/api/docs", express.static(swaggerPath));
 app.get("/api/docs/swagger.json", (req, res) => res.json(swaggerSpec));
-app.get("/api/docs.json", (req, res) => res.json(swaggerSpec));
 
 app.get("/api/docs", (req, res) => {
   res.setHeader("Content-Type", "text/html; charset=utf-8");
-  res.send(`<!DOCTYPE html>
+  res.send(`
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SkillBased Tracker API Docs</title>
   <link rel="stylesheet" href="/api/docs/swagger-ui.css" />
   <link rel="icon" type="image/png" href="/api/docs/favicon-32x32.png" sizes="32x32" />
@@ -68,7 +63,6 @@ app.get("/api/docs", (req, res) => {
 </head>
 <body>
   <div id="swagger-ui"></div>
-
   <script src="/api/docs/swagger-ui-bundle.js"></script>
   <script src="/api/docs/swagger-ui-standalone-preset.js"></script>
   <script>
@@ -85,10 +79,10 @@ app.get("/api/docs", (req, res) => {
     };
   </script>
 </body>
-</html>`);
+</html>
+`);
 });
 
-// Health check
 app.get("/", (req, res) => res.json({ status: "OK" }));
 
 let isConnected = false;
@@ -100,7 +94,6 @@ app.use(async (req, res, next) => {
   next();
 });
 
-// ROUTES
 app.use("/api/auth", authRateLimit, userRoutes);
 app.use("/api/skills", skillsRateLimit, skillsRouter);
 app.use("/api/practice-logs", skillsRateLimit, practiceRoute);
@@ -108,7 +101,6 @@ app.use("/api/evidence", skillsRateLimit, evidenceRoute);
 app.use("/api/analytics", analyticsRateLimit, analyticsRoute);
 app.use("/api/rankings", rankingRateLimit, rankingRoute);
 
-// Error handler LAST
 app.use(errorHandler);
 
 export default app;
