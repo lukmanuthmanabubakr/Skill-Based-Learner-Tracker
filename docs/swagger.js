@@ -439,7 +439,7 @@ const options = {
   swaggerDefinition,
 
   // IMPORTANT: point swagger-jsdoc to your route files
-  apis: ["./src/routes/*.js"],
+  apis: [`${process.cwd()}/src/routes/*.js`],
 };
 
 export const swaggerSpec = swaggerJSDoc(options);

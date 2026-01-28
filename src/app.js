@@ -34,9 +34,14 @@ const app = express();
 // CORS
 app.use(
   cors({
-    origin: ["http://localhost:5173", "http://127.0.0.1:5173"],
+    origin: [
+      "http://localhost:5173",
+      "http://127.0.0.1:5173",
+      "https://skill-based-learner-tracker.vercel.app",
+    ],
+
     credentials: true,
-  })
+  }),
 );
 
 app.use(express.json());
@@ -46,7 +51,8 @@ app.use(correlationIdMiddleware);
 app.use(globalRateLimit);
 
 // Swagger Docs
-app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use("/api/docs", swaggerUi.serve);
+app.get("/api/docs", swaggerUi.setup(swaggerSpec));
 app.get("/api/docs.json", (req, res) => res.json(swaggerSpec));
 
 app.get("/", (req, res) => res.json({ status: "OK" }));
