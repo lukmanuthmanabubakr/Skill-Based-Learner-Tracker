@@ -46,7 +46,12 @@ app.use(correlationIdMiddleware);
 app.use(globalRateLimit);
 
 const swaggerPath = swaggerUiDist.getAbsoluteFSPath();
+app.get("/api/docs/swagger-ui.css", (req, res) => {
+  res.sendFile(`${swaggerPath}/swagger-ui.css`);
+});
+
 app.use("/api/docs", express.static(swaggerPath));
+
 app.get("/api/docs/swagger.json", (req, res) => res.json(swaggerSpec));
 
 app.get("/api/docs", (req, res) => {
