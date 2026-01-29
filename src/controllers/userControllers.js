@@ -5,7 +5,7 @@ import { validateObject, userProfileValidationRules } from "../utils/validators.
 import { AppError, ValidationError } from "../utils/appError.js";
 import logger from "../utils/logger.js";
 
-// The Registration Logic
+// The Register Logic
 export const registerUser = async (req, res) => {
   try {
     const { name, email, password } = req.body;
