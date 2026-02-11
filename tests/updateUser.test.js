@@ -13,7 +13,7 @@
 import assert from "assert";
 
 /**
- * TEST: Update user name successfully
+ * TEST: Update user name successfully.
  * SCENARIO: Authenticated user updates their name
  * EXPECTED: 200 OK with updated user profile
  */
@@ -42,7 +42,7 @@ export async function testUpdateUserName() {
 }
 
 /**
- * TEST: Update user bio successfully
+ * TEST: Update user bio successfully done.
  * SCENARIO: Authenticated user adds/updates their bio
  * EXPECTED: 200 OK with updated bio
  */
