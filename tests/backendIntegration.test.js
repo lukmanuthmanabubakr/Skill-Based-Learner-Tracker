@@ -15,7 +15,7 @@ let testEvidenceId = null;
 /**
  * TEST 1: Register new user
  * SCENARIO: New user creates account with valid credentials
- * EXPECTED: 200 OK with token and user data
+ * EXPECTED: 200 OK with token and user data.
  */
 async function testRegisterUser() {
   console.log("\n TEST 1: Register New User");
@@ -47,7 +47,7 @@ async function testRegisterUser() {
 /**
  * TEST 2: Reject duplicate email on registration
  * SCENARIO: Attempt to register with existing email
- * EXPECTED: 409 Conflict error
+ * EXPECTED: 409 Conflict error.
  */
 async function testRejectDuplicateEmail() {
   console.log("\n TEST 2: Reject Duplicate Email Registration");
