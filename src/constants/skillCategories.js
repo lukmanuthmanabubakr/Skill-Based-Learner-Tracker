@@ -7,6 +7,7 @@ export const SKILL_CATEGORIES = Object.freeze([
   "Design",
   "Language Learning",
   "Business Skills",
+  "TEACHING SKILLS",
   "Creative Arts",
   "Other",
 ]);
