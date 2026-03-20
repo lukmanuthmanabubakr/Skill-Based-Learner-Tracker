@@ -14,7 +14,6 @@ const skillsRouter = express.Router();
 
 /**
  * @openapi
- * tags:
  *     description: Manage user skills
  */
 
